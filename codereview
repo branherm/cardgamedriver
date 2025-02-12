@@ -1,0 +1,110 @@
+ Changes to the Java Classes
+
+This document outlines the modifications made to the Deck, Hand, and Card classes. These changes enhance code efficiency, maintainability, and readability while preserving the original functionality.
+
+Deck Class
+
+Changes Made:
+
+JavaDoc Comments Added:
+
+Descriptions for each method, explaining their purpose and behavior.
+
+Replaced Custom Shuffle with Built-in Method:
+
+Used Collections.shuffle(deck, rand); instead of manually removing and re-adding cards for better efficiency.
+
+Added Safety Checks in pick() and deal() Methods:
+
+Ensured methods return null if the deck is empty or the index is out of bounds instead of causing an exception.
+
+Preserved Original Code as Comments:
+
+The previous shuffle and card selection methods are commented out for reference.
+
+Hand Class
+
+Changes Made:
+
+JavaDoc Comments Added:
+
+Documented each method for better understanding and maintainability.
+
+Optimized getTotalValue() Method:
+
+Replaced switch statements with an array lookup for rank values.
+
+Optimized handling of Aces to decide their value dynamically.
+
+Added Null Safety in getCard() Method:
+
+Prevents out-of-bounds errors by returning null instead of throwing an exception.
+
+Preserved Original Code as Comments:
+
+The previous getTotalValue() method is commented out for reference.
+
+Card Class
+
+Changes Made:
+
+JavaDoc Comments Added:
+
+Documented the Card class, including constructors and getter methods.
+
+Refactored toString() Method for Readability:
+
+Improved formatting for displaying card information.
+
+
+# Blackjack Game Updates
+
+## Key Improvements & Changes
+
+### 1. **Deck Management**
+- Added automatic deck reshuffling in `deal()` when fewer than 4 cards remain to prevent runtime errors.
+- Fixed `reset(boolean newDeck)` to properly reinitialize player/dealer hands.
+
+### 2. **Error Prevention**
+- Added safety checks in `playerTurn()` and `dealerTurn()` to avoid drawing from an empty deck.
+
+### 3. **Code Quality**
+- Replaced string concatenation with `StringBuilder` in `toString()` for better performance.
+- Added Javadoc comments for all methods to clarify behavior and usage.
+
+### 4. **Specification Adherence**
+- Dealer now hits on soft 17 (total < 17) as per standard Blackjack rules.
+- Player automatically hits until total ≥ 16 (simplified strategy).
+
+---
+
+**Why These Changes Matter**  
+- Prevents `IllegalArgumentException`/`NullPointerException` during card drawing.
+- Ensures game stability over multiple rounds.
+- Improves code maintainability and documentation clarity.
+
+
+LamarckianPoker.java
+Issue Description
+The error in the LamarckianPoker class occurs in the turn() method when selecting a random card from a player's hand. Specifically, the issue arises when calling rand.nextInt(player1Hand.size()) or rand.nextInt(player2Hand.size()). If either player's hand is empty (i.e., size() returns 0), rand.nextInt(0) throws an IllegalArgumentException because the nextInt method requires a positive integer as input.
+
+Why It Occurs Occasionally
+The error only occurs occasionally because it depends on the state of the game. During normal gameplay, players' hands are populated with cards, so size() returns a positive integer, and rand.nextInt() works as expected. However, if a player's hand becomes empty (e.g., due to card removal or insufficient cards in the deck), the size() method returns 0, causing the error.
+
+Proposed Fix
+To prevent the error, we need to ensure that rand.nextInt() is never called with a value of 0. This can be achieved by using Math.max(1, playerXHand.size()) to ensure the argument is at least 1. This fix has already been implemented in the updated code:
+
+
+Card player1Card = player1Hand.getCard(rand.nextInt(Math.max(1, player1Hand.size())));
+Card player2Card = player2Hand.getCard(rand.nextInt(Math.max(1, player2Hand.size())));
+This ensures that even if a player's hand is empty, rand.nextInt(1) will return 0, which is a valid index for an empty list (though no card will be selected, which is handled by the game logic).
+
+Additional Considerations
+If the project specifications allow, it might be worth adding a check to end the game if a player's hand becomes empty, as this could indicate an edge case (e.g., running out of cards in the deck). This would make the game logic more robust and prevent unexpected behavior. For example:
+
+
+if (player1Hand.size() == 0 || player2Hand.size() == 0) {
+    return false; // End the game if either player has no cards
+}
+This change would align with the game's design and ensure a smoother experience.
+
